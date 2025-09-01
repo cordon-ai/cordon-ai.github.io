@@ -1,921 +1,468 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Menu, X, Zap, Users, Code, Shield, CheckCircle, Play, Star, Github, Twitter, Linkedin, ChevronRight } from 'lucide-react';
+import { ArrowRight, Menu, X, Zap, Users, Code, Shield, CheckCircle, Play, ChevronRight, Cpu, Network, Layers, GitBranch, Lock, Terminal } from 'lucide-react';
 import cordonLogo from './assets/cordon_logo.png';
 
 const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
-  const heroRef = useRef(null);
-  const featuresRef = useRef(null);
-  const architectureRef = useRef(null);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-
     const handleScroll = () => {
       setScrollY(window.scrollY);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);
     
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
-  const ScaleGlowEffect = ({ children, className = "", intensity = 0.08 }) => {
-    const [localMousePos, setLocalMousePos] = useState({ x: 0, y: 0 });
-    const elementRef = useRef(null);
-
-    const handleMouseMove = (e) => {
-      if (elementRef.current) {
-        const rect = elementRef.current.getBoundingClientRect();
-        setLocalMousePos({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        });
-      }
-    };
-
+  const AgentCard = ({ title, description, icon: Icon }) => {
     return (
-      <div
-        ref={elementRef}
-        className={`relative ${className}`}
-        onMouseMove={handleMouseMove}
-        style={{
-          background: `radial-gradient(800px circle at ${localMousePos.x}px ${localMousePos.y}px, rgba(0, 255, 255, ${intensity}), transparent 40%)`
-        }}
-      >
-        {children}
+      <div className="group p-6 rounded-lg border border-gray-800 hover:border-cyan-500/50 transition-all duration-300 bg-gray-900/30 backdrop-blur-sm">
+        <div className="flex items-start space-x-4">
+          <div className="p-2 rounded border border-cyan-500/20 group-hover:border-cyan-500/50 transition-colors bg-gradient-to-br from-cyan-500/10 to-blue-500/10">
+            <Icon className="w-5 h-5 text-cyan-400 group-hover:text-cyan-300 transition-colors" strokeWidth={1.5} />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-base font-light text-white mb-2 group-hover:text-cyan-300 transition-colors">
+              {title}
+            </h3>
+            <p className="text-sm font-light text-gray-400 leading-relaxed">
+              {description}
+            </p>
+          </div>
+        </div>
       </div>
     );
   };
 
-  const AgentCard = ({ title, description, icon: Icon, delay = 0 }) => {
-    const [isHovered, setIsHovered] = useState(false);
-
+  const FeatureCard = ({ title, description, icon: Icon, metrics }) => {
     return (
-      <div
-        className="relative p-6 rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm transition-all duration-500 hover:border-cyan-500/50 hover:bg-gray-800/70 group cursor-pointer transform hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/20"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        style={{ animationDelay: `${delay}ms` }}
-      >
-        <div className="flex items-center mb-4">
-          <div className="p-3 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 group-hover:from-cyan-500/30 group-hover:to-blue-500/30 transition-all">
-            <Icon className="w-6 h-6 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
-          </div>
-        </div>
-        <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-cyan-300 transition-colors">
-          {title}
-        </h3>
-        <p className="text-sm text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
+      <div className="p-8 rounded-lg border border-gray-800 hover:border-cyan-500/30 transition-all duration-300 bg-gray-900/20 backdrop-blur-sm">
+        <Icon className="w-8 h-8 text-cyan-500 mb-4" strokeWidth={1} />
+        <h3 className="text-lg font-light text-white mb-3">{title}</h3>
+        <p className="text-sm font-light text-gray-400 leading-relaxed mb-4">
           {description}
         </p>
-        <div className={`absolute inset-0 rounded-xl border transition-all duration-300 ${
-          isHovered ? 'border-cyan-500/50 shadow-lg shadow-cyan-500/25' : 'border-transparent'
-        }`} />
+        {metrics && (
+          <div className="pt-4 border-t border-gray-800">
+            <div className="text-2xl font-light text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">{metrics.value}</div>
+            <div className="text-xs font-light text-gray-500 mt-1">{metrics.label}</div>
+          </div>
+        )}
       </div>
     );
   };
-
-  const InteractiveArchitecture = () => {
-    const [activeSection, setActiveSection] = useState('orchestrator');
-
-    const sections = [
-      {
-        id: 'orchestrator',
-        title: 'Intelligent Orchestrator',
-        description: 'Central command that analyzes requests and coordinates agent workflows with dynamic routing and load balancing.',
-        icon: Users,
-        color: 'from-blue-500 to-cyan-500'
-      },
-      {
-        id: 'agents',
-        title: 'Agent Ecosystem',
-        description: 'Diverse collection of specialized AI workers running in secure sandboxes with real-time monitoring and scaling.',
-        icon: Zap,
-        color: 'from-purple-500 to-pink-500'
-      },
-      {
-        id: 'infrastructure',
-        title: 'Smart Infrastructure',
-        description: 'Adaptive platform that provides tools, memory, APIs, and integrations with automatic resource optimization.',
-        icon: Code,
-        color: 'from-green-500 to-blue-500'
-      }
-    ];
-
-    const ArchitectureVisual = ({ section }) => {
-      const components = {
-        orchestrator: (
-          <div className="relative w-full h-full">
-            {/* Central Brain */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-2xl shadow-blue-500/30 animate-pulse">
-                <Users className="w-12 h-12 text-white" />
-              </div>
-              <div className="absolute inset-0 rounded-full border-4 border-blue-400/30 animate-ping" />
-            </div>
-            
-            {/* Connection Lines */}
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <div
-                key={i}
-                className="absolute top-1/2 left-1/2 w-20 h-0.5 bg-gradient-to-r from-blue-400 to-transparent origin-left animate-pulse"
-                style={{
-                  transform: `translate(-50%, -50%) rotate(${i * 60}deg)`,
-                  animationDelay: `${i * 0.2}s`
-                }}
-              />
-            ))}
-            
-            {/* Satellite Nodes */}
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <div
-                key={i}
-                className="absolute w-8 h-8 rounded-full bg-blue-400/50 border-2 border-blue-300"
-                style={{
-                  top: '50%',
-                  left: '50%',
-                  transform: `translate(-50%, -50%) translate(${Math.cos(i * Math.PI / 3) * 80}px, ${Math.sin(i * Math.PI / 3) * 80}px)`
-                }}
-              />
-            ))}
-            
-            <div className="absolute bottom-4 left-4 text-xs text-gray-400">
-              Request Analysis & Routing
-            </div>
-          </div>
-        ),
-        agents: (
-          <div className="relative w-full h-full">
-            {/* Agent Grid */}
-            <div className="grid grid-cols-3 gap-4 h-full p-8">
-              {[
-                { name: 'NLP Agent', status: 'active', color: 'bg-green-500' },
-                { name: 'Vision Agent', status: 'idle', color: 'bg-yellow-500' },
-                { name: 'Code Agent', status: 'active', color: 'bg-green-500' },
-                { name: 'Data Agent', status: 'processing', color: 'bg-blue-500' },
-                { name: 'API Agent', status: 'active', color: 'bg-green-500' },
-                { name: 'Custom Agent', status: 'idle', color: 'bg-gray-500' },
-              ].map((agent, i) => (
-                <div
-                  key={i}
-                  className="relative p-4 rounded-lg border border-gray-700 bg-gray-800/50 hover:border-purple-500/50 transition-all group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className={`w-3 h-3 rounded-full ${agent.color} animate-pulse`} />
-                    <Zap className="w-4 h-4 text-purple-400" />
-                  </div>
-                  <div className="text-xs text-white font-medium">{agent.name}</div>
-                  <div className="text-xs text-gray-400 mt-1">{agent.status}</div>
-                  
-                  {agent.status === 'processing' && (
-                    <div className="absolute inset-0 rounded-lg border-2 border-purple-500/50 animate-pulse" />
-                  )}
-                </div>
-              ))}
-            </div>
-            
-            <div className="absolute bottom-4 left-4 text-xs text-gray-400">
-              Secure Sandboxed Execution
-            </div>
-          </div>
-        ),
-        infrastructure: (
-          <div className="relative w-full h-full">
-            {/* Infrastructure Layers */}
-            <div className="space-y-4 p-8 h-full">
-              {[
-                { name: 'Memory Layer', items: ['Vector DB', 'Context Store', 'Session Cache'], color: 'border-green-500' },
-                { name: 'Tool Layer', items: ['APIs', 'Integrations', 'Connectors'], color: 'border-blue-500' },
-                { name: 'Security Layer', items: ['Sandbox', 'Auth', 'Monitoring'], color: 'border-red-500' },
-                { name: 'Scale Layer', items: ['Load Balancer', 'Auto-scale', 'Health Check'], color: 'border-yellow-500' }
-              ].map((layer, i) => (
-                <div key={i} className={`p-4 rounded-lg border-2 ${layer.color} bg-gray-800/30 hover:bg-gray-700/50 transition-all`}>
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-sm font-semibold text-white">{layer.name}</h4>
-                    <Code className="w-4 h-4 text-green-400" />
-                  </div>
-                  <div className="flex gap-2">
-                    {layer.items.map((item, j) => (
-                      <div key={j} className="px-2 py-1 text-xs bg-gray-700 rounded text-gray-300">
-                        {item}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="absolute bottom-4 left-4 text-xs text-gray-400">
-              Adaptive Resource Management
-            </div>
-          </div>
-        )
-      };
-
-      return (
-        <div className="w-full h-96 bg-gray-900/30 border border-gray-800 rounded-xl overflow-hidden relative">
-          {components[section]}
-        </div>
-      );
-    };
-
-    return (
-      <div className="grid lg:grid-cols-2 gap-12 items-start">
-        {/* Left Side - Interactive Sections */}
-        <div className="space-y-4">
-          {sections.map((section) => {
-            const Icon = section.icon;
-            const isActive = activeSection === section.id;
-            
-            return (
-              <div
-                key={section.id}
-                className={`p-6 rounded-xl border cursor-pointer transition-all duration-300 group ${
-                  isActive 
-                    ? 'border-cyan-500/50 bg-gray-800/70 shadow-lg shadow-cyan-500/20' 
-                    : 'border-gray-800 bg-gray-900/50 hover:border-gray-700 hover:bg-gray-800/50'
-                }`}
-                onMouseEnter={() => setActiveSection(section.id)}
-              >
-                <div className="flex items-start space-x-4">
-                  <div className={`p-3 rounded-lg bg-gradient-to-br ${section.color} opacity-90 group-hover:opacity-100 transition-opacity`}>
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className={`text-lg font-semibold mb-2 transition-colors ${
-                      isActive ? 'text-cyan-300' : 'text-white group-hover:text-cyan-300'
-                    }`}>
-                      {section.title}
-                    </h3>
-                    <p className={`text-sm leading-relaxed transition-colors ${
-                      isActive ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'
-                    }`}>
-                      {section.description}
-                    </p>
-                  </div>
-                  <div className={`transition-transform ${isActive ? 'rotate-90' : 'group-hover:translate-x-1'}`}>
-                    <ArrowRight className="w-5 h-5 text-gray-400" />
-                  </div>
-                </div>
-                
-                {isActive && (
-                  <div className="mt-4 pt-4 border-t border-gray-700">
-                    <div className="flex items-center text-xs text-cyan-400">
-                      <CheckCircle className="w-3 h-3 mr-2" />
-                      <span>Active Component</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Right Side - Dynamic Visual */}
-        <div className="lg:sticky lg:top-24">
-          <ArchitectureVisual section={activeSection} />
-          
-          {/* Component Info */}
-          <div className="mt-6 p-4 bg-gray-900/30 border border-gray-800 rounded-lg">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-cyan-300">
-                {sections.find(s => s.id === activeSection)?.title}
-              </h4>
-              <div className="flex items-center text-xs text-gray-400">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
-                Live Preview
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const CodeBlock = ({ children }) => (
-    <div className="bg-black/80 border border-gray-800 rounded-lg p-4 font-mono text-xs overflow-x-auto backdrop-blur-sm">
-      <pre className="text-cyan-300">{children}</pre>
-    </div>
-  );
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden relative font-sans">
-      {/* Animated Background */}
+    <div className="min-h-screen bg-black text-white overflow-hidden">
+      {/* Animated background with colors */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-black" />
         
         {/* Floating orbs */}
-        <div className="absolute w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl opacity-30 top-10 left-10 animate-pulse" />
-        <div className="absolute w-96 h-96 bg-blue-500/20 rounded-full blur-3xl opacity-30 top-60 right-10 animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute w-48 h-48 bg-purple-500/20 rounded-full blur-3xl opacity-30 bottom-20 left-20 animate-pulse" style={{ animationDelay: '4s' }} />
+        <div className="absolute w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl opacity-50 top-10 left-10 animate-pulse" />
+        <div className="absolute w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl opacity-50 top-60 right-10 animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute w-80 h-80 bg-purple-500/10 rounded-full blur-3xl opacity-50 bottom-20 left-20 animate-pulse" style={{ animationDelay: '4s' }} />
         
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div 
-            className="absolute inset-0" 
-            style={{
-              backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`,
-              backgroundSize: '50px 50px'
-            }} 
-          />
-        </div>
+        {/* Grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)`,
+            backgroundSize: '100px 100px'
+          }} 
+        />
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-50 px-6 py-4 border-b border-gray-800/50 backdrop-blur-md bg-black/80 sticky top-0">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <nav className="relative z-50 px-8 py-6 border-b border-gray-900">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <img src={cordonLogo} alt="Cordon Logo" className="w-8 h-8 rounded-full border border-cyan-500/30" />
-            <span className="text-xl font-semibold tracking-tight text-white">
+            <div className="relative">
+              <div className="absolute inset-0 bg-cyan-500/30 rounded-full blur-xl scale-150"></div>
+              <img src={cordonLogo} alt="Cordon" className="relative w-16 h-16 rounded-full border border-cyan-500/40" />
+            </div>
+            <span className="text-lg font-light tracking-wide text-white">
               Cordon
             </span>
           </div>
 
-          <div className="hidden md:flex items-center space-x-6">
-            <a href="#how-it-works" className="text-sm text-gray-300 hover:text-white transition-colors font-medium">How It Works</a>
-            <a href="#use-cases" className="text-sm text-gray-300 hover:text-white transition-colors font-medium">Use Cases</a>
-            <a href="#developers" className="text-sm text-gray-300 hover:text-white transition-colors font-medium">Developers</a>
-            <a href="#company" className="text-sm text-gray-300 hover:text-white transition-colors font-medium">Company</a>
+          <div className="hidden md:flex items-center space-x-8">
+            <a href="#architecture" className="text-sm font-light text-gray-500 hover:text-white transition-colors">Architecture</a>
+            <a href="#capabilities" className="text-sm font-light text-gray-500 hover:text-white transition-colors">Capabilities</a>
+            <a href="#security" className="text-sm font-light text-gray-500 hover:text-white transition-colors">Security</a>
+            <a href="#developers" className="text-sm font-light text-gray-500 hover:text-white transition-colors">Developers</a>
           </div>
 
-          <div className="flex items-center space-x-3">
-            <button className="hidden md:block px-4 py-2 text-sm rounded-lg border border-gray-700 text-gray-300 hover:border-gray-600 hover:text-white transition-all font-medium">
-              Sign In
+          <div className="flex items-center space-x-4">
+            <button className="hidden md:block px-5 py-2 text-sm font-light rounded border border-gray-800 text-gray-400 hover:text-white hover:border-gray-700 transition-all">
+              Documentation
             </button>
-            <button className="px-4 py-2 text-sm rounded-lg bg-white text-black font-medium hover:bg-gray-100 transition-all">
+            <button className="px-5 py-2 text-sm font-light rounded bg-white text-black hover:bg-gray-100 transition-all">
               Request Access
             </button>
             <button 
-              className="md:hidden p-2 rounded-lg hover:bg-gray-800 transition-colors"
+              className="md:hidden p-2"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isMenuOpen ? <X className="w-5 h-5" strokeWidth={1.5} /> : <Menu className="w-5 h-5" strokeWidth={1.5} />}
             </button>
           </div>
         </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-md border-b border-gray-800">
-            <div className="px-6 py-4 space-y-3">
-              <a href="#how-it-works" className="block text-sm text-gray-300 hover:text-white transition-colors">How It Works</a>
-              <a href="#use-cases" className="block text-sm text-gray-300 hover:text-white transition-colors">Use Cases</a>
-              <a href="#developers" className="block text-sm text-gray-300 hover:text-white transition-colors">Developers</a>
-              <a href="#company" className="block text-sm text-gray-300 hover:text-white transition-colors">Company</a>
-              <button className="w-full text-left px-4 py-2 border border-gray-700 rounded-lg text-gray-300 hover:border-gray-600 hover:text-white transition-all">
-                Sign In
-              </button>
+          <div className="md:hidden absolute top-full left-0 right-0 bg-black border-b border-gray-900">
+            <div className="px-8 py-6 space-y-4">
+              <a href="#architecture" className="block text-sm font-light text-gray-500 hover:text-white transition-colors">Architecture</a>
+              <a href="#capabilities" className="block text-sm font-light text-gray-500 hover:text-white transition-colors">Capabilities</a>
+              <a href="#security" className="block text-sm font-light text-gray-500 hover:text-white transition-colors">Security</a>
+              <a href="#developers" className="block text-sm font-light text-gray-500 hover:text-white transition-colors">Developers</a>
             </div>
           </div>
         )}
       </nav>
 
       {/* Hero Section */}
-      <ScaleGlowEffect intensity={0.08}>
-        <section ref={heroRef} className="relative px-6 py-20 md:py-24 z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-gray-900/60 border border-gray-800 text-xs text-cyan-400 mb-8 backdrop-blur-sm">
-              <Zap className="w-3 h-3 mr-2" />
-              Next-generation AI orchestration platform
-              <span className="ml-2 px-2 py-1 text-xs bg-cyan-500/20 text-cyan-300 rounded-full">NEW</span>
+      <section className="relative px-8 py-24 z-10">
+        <div className="max-w-7xl mx-auto text-center">
+          {/* Logo */}
+          <div className="mb-12 flex justify-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-cyan-500/40 rounded-full blur-3xl scale-150" style={{ animation: 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}></div>
+              <div className="absolute inset-0 bg-blue-500/25 rounded-full blur-2xl scale-125" style={{ animation: 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '1s' }}></div>
+              <div className="absolute inset-0 rounded-full border-2 border-cyan-500/70" style={{ animation: 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '0.5s' }}></div>
+              <img src={cordonLogo} alt="Cordon" className="relative w-32 h-32 rounded-full border-2 border-cyan-500/50 shadow-2xl" />
             </div>
+          </div>
             
-            {/* Hero Logo */}
-            <div className="w-24 h-24 mx-auto mb-12 relative">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-500/30 to-blue-600/30 blur-xl animate-pulse" />
-              <img 
-                src={cordonLogo} 
-                alt="Cordon Logo" 
-                className="relative w-full h-full rounded-full shadow-2xl shadow-cyan-500/25 border-2 border-cyan-500/50 hover:border-cyan-400/70 transition-all duration-500 hover:scale-105" 
-              />
-            </div>
+          <h1 className="text-5xl md:text-7xl font-extralight leading-tight mb-6">
+            The Operating System for<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
+              Multi-Agent AI Systems
+            </span>
+          </h1>
+          
+          <p className="text-lg font-light text-gray-500 mb-12 max-w-3xl mx-auto leading-relaxed">
+            Orchestrate autonomous agents, scale workflows, and deploy intelligence across software and hardware — with Cordon.
+          </p>
 
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              The Operating System for{' '}
-              <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
-                Multi-Agent AI Systems
-              </span>
-            </h1>
-            
-            <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Orchestrate autonomous agents, scale workflows, and deploy intelligence across software and hardware — with Cordon.
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button className="px-8 py-4 rounded-lg text-sm font-medium bg-white text-black hover:bg-gray-100 transition-all flex items-center justify-center">
+              Request Access
+              <ArrowRight className="w-4 h-4 ml-2" strokeWidth={1.5} />
+            </button>
+            <button className="px-8 py-4 rounded-lg text-sm font-medium border border-gray-700 text-gray-400 hover:text-white hover:border-gray-600 transition-all flex items-center justify-center">
+              <Terminal className="w-4 h-4 mr-2" strokeWidth={1.5} />
+              Try SDK
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Architecture Section */}
+      <section id="architecture" className="relative px-8 py-20 z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-16">
+            <h2 className="text-3xl font-extralight mb-4">Modular Architecture</h2>
+            <p className="text-lg font-light text-gray-500 max-w-3xl">
+              A hierarchical orchestration system where a central AI coordinator manages specialized agents, each running in isolated sandboxes with controlled permissions.
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button className="px-8 py-4 rounded-lg bg-white text-black font-medium hover:bg-gray-100 transition-all">
-                Request Access
-                <ArrowRight className="w-4 h-4 ml-2 inline" />
-              </button>
-              <button className="px-8 py-4 rounded-lg border border-gray-700 text-gray-300 font-medium hover:border-gray-600 hover:text-white transition-all">
-                <Play className="w-4 h-4 mr-2 inline" />
-                See How It Works
-              </button>
-            </div>
           </div>
-        </section>
-      </ScaleGlowEffect>
 
-      {/* Interactive Architecture Section - Scale AI Style */}
-      <ScaleGlowEffect intensity={0.06}>
-        <section className="relative px-6 py-20 z-10">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Full-Stack AI Orchestration</h2>
-              <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                Experience how Cordon's modular architecture adapts to your workflow needs across every layer of AI automation.
-              </p>
-            </div>
-
-            <InteractiveArchitecture />
+          <div className="grid lg:grid-cols-3 gap-6">
+            <AgentCard
+              title="Orchestrator Layer"
+              description="Central AI that interprets requests, maintains context, and coordinates agent workflows with intelligent routing and dependency management."
+              icon={Network}
+            />
+            <AgentCard
+              title="Agent Runtime"
+              description="Sandboxed execution environment for specialized agents with resource limits, API access control, and secure inter-agent communication."
+              icon={Layers}
+            />
+            <AgentCard
+              title="Integration Layer"
+              description="Extensible APIs, vector databases for memory, and standardized protocols for third-party agent integration and discovery."
+              icon={GitBranch}
+            />
           </div>
-        </section>
-      </ScaleGlowEffect>
 
-
-      {/* How It Works Section */}
-      <ScaleGlowEffect intensity={0.06}>
-        <section id="how-it-works" ref={architectureRef} className="relative px-6 py-20 z-10">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
-              <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                Cordon acts as an intelligent control tower, understanding user intent and coordinating the right agents to solve complex problems.
-              </p>
-            </div>
-
-            {/* Architecture Diagram */}
-            <div className="grid md:grid-cols-3 gap-6 mb-16">
-              <AgentCard
-                title="Orchestrator"
-                description="The central brain that interprets user requests, selects optimal agents, and coordinates complex workflows with intelligent routing."
-                icon={Users}
-                delay={0}
-              />
-              <AgentCard
-                title="Agents"
-                description="Specialized AI workers that handle specific tasks - from LLM-powered reasoning to code execution in secure sandboxes."
-                icon={Zap}
-                delay={100}
-              />
-              <AgentCard
-                title="Tools"
-                description="Extensible APIs, memory systems, and integrations that agents use to interact with the real world and learn over time."
-                icon={Code}
-                delay={200}
-              />
-            </div>
-
-            {/* Process Flow */}
-            <div className="bg-gray-900/30 border border-gray-800 rounded-xl p-8 backdrop-blur-sm">
-              <h3 className="text-xl font-bold mb-8 text-center">Agent Orchestration Process</h3>
-              <div className="grid md:grid-cols-5 gap-6 items-center">
-                {[
-                  { step: '1', title: 'Request Intake', desc: 'User sends high-level request', color: 'from-red-500 to-orange-500' },
-                  { step: '2', title: 'Intent Analysis', desc: 'Orchestrator interprets context', color: 'from-orange-500 to-yellow-500' },
-                  { step: '3', title: 'Agent Selection', desc: 'Best agents are discovered', color: 'from-yellow-500 to-green-500' },
-                  { step: '4', title: 'Secure Execution', desc: 'Agents run in sandboxes', color: 'from-green-500 to-cyan-500' },
-                  { step: '5', title: 'Result Delivery', desc: 'Output returned to user', color: 'from-cyan-500 to-blue-500' }
-                ].map((item, index) => (
-                  <div key={index} className="text-center group">
-                    <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${item.color} text-white font-bold text-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
-                      {item.step}
-                    </div>
-                    <h4 className="font-semibold mb-2 text-sm text-cyan-300 group-hover:text-cyan-200 transition-colors">{item.title}</h4>
-                    <p className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">{item.desc}</p>
-                    {index < 4 && (
-                      <ArrowRight className="w-5 h-5 text-gray-600 mx-auto mt-4 hidden md:block group-hover:text-gray-500 transition-colors" />
-                    )}
-                  </div>
-                ))}
+          {/* Technical Diagram with colors */}
+          <div className="mt-16 p-8 rounded-lg border border-gray-800 bg-gray-900/30 backdrop-blur-sm">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div>
+                <h4 className="text-sm font-light text-cyan-400 mb-4">INPUT LAYER</h4>
+                <div className="space-y-2">
+                  <div className="p-3 rounded border border-cyan-500/20 bg-cyan-500/5 text-sm font-light text-gray-300">Natural Language API</div>
+                  <div className="p-3 rounded border border-blue-500/20 bg-blue-500/5 text-sm font-light text-gray-300">REST/gRPC Interface</div>
+                  <div className="p-3 rounded border border-purple-500/20 bg-purple-500/5 text-sm font-light text-gray-300">Event Streams</div>
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-light text-blue-400 mb-4">ORCHESTRATION</h4>
+                <div className="space-y-2">
+                  <div className="p-3 rounded border border-blue-500/20 bg-blue-500/5 text-sm font-light text-gray-300">Intent Analysis</div>
+                  <div className="p-3 rounded border border-indigo-500/20 bg-indigo-500/5 text-sm font-light text-gray-300">Agent Selection</div>
+                  <div className="p-3 rounded border border-purple-500/20 bg-purple-500/5 text-sm font-light text-gray-300">Workflow Execution</div>
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-light text-purple-400 mb-4">AGENT POOL</h4>
+                <div className="space-y-2">
+                  <div className="p-3 rounded border border-green-500/20 bg-green-500/5 text-sm font-light text-gray-300">Internal Agents</div>
+                  <div className="p-3 rounded border border-yellow-500/20 bg-yellow-500/5 text-sm font-light text-gray-300">Third-Party Agents</div>
+                  <div className="p-3 rounded border border-pink-500/20 bg-pink-500/5 text-sm font-light text-gray-300">Custom Agents</div>
+                </div>
               </div>
             </div>
           </div>
-        </section>
-      </ScaleGlowEffect>
+        </div>
+      </section>
 
-      {/* Use Cases Section */}
-      <ScaleGlowEffect intensity={0.06}>
-        <section id="use-cases" className="relative px-6 py-20 z-10">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Use Cases</h2>
-              <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                From enterprise workflows to robotics coordination, Cordon adapts to any domain requiring intelligent automation.
+      {/* Capabilities Section */}
+      <section id="capabilities" className="relative px-8 py-20 z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-16">
+            <h2 className="text-3xl font-extralight mb-4">Platform Capabilities</h2>
+            <p className="text-lg font-light text-gray-500 max-w-3xl">
+              Built for enterprises requiring reliable, scalable AI orchestration across diverse domains.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <FeatureCard
+              title="Adaptive Learning"
+              description="Continuously improves performance by learning from client data, preferences, and workflows. Maintains persistent context across interactions."
+              icon={Cpu}
+              metrics={{ value: "10M+", label: "Agent Executions" }}
+            />
+            <FeatureCard
+              title="Cross-Domain Integration"
+              description="Extends from enterprise software to IoT devices and robotics. Unified control plane for digital and physical agent coordination."
+              icon={Network}
+              metrics={{ value: "500+", label: "Integrated Systems" }}
+            />
+            <FeatureCard
+              title="Developer Ecosystem"
+              description="Open SDK for third-party agent development. Revenue sharing model for contributed agents with automated discovery."
+              icon={Code}
+              metrics={{ value: "1000+", label: "Custom Agents" }}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Security Section */}
+      <section id="security" className="relative px-8 py-20 z-10 border-t border-gray-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl font-extralight mb-6">Enterprise Security</h2>
+              <p className="text-lg font-light text-gray-500 mb-8 leading-relaxed">
+                Multi-layered security architecture ensuring data isolation, controlled access, and complete audit trails for regulatory compliance.
               </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <Lock className="w-5 h-5 text-cyan-500 mt-0.5" strokeWidth={1.5} />
+                  <div>
+                    <h4 className="text-sm font-light text-white mb-1">Sandboxed Execution</h4>
+                    <p className="text-sm font-light text-gray-500">Isolated containers with resource limits and network restrictions</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <Shield className="w-5 h-5 text-blue-500 mt-0.5" strokeWidth={1.5} />
+                  <div>
+                    <h4 className="text-sm font-light text-white mb-1">Fine-Grained Permissions</h4>
+                    <p className="text-sm font-light text-gray-500">Role-based access control with principle of least privilege</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" strokeWidth={1.5} />
+                  <div>
+                    <h4 className="text-sm font-light text-white mb-1">Compliance Ready</h4>
+                    <p className="text-sm font-light text-gray-500">SOC 2 Type II, GDPR compliant with full audit logs</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  title: 'Enterprise Automation',
-                  description: 'Automate document processing, financial analysis, and complex business workflows with intelligent agent coordination.',
-                  gradient: 'from-purple-500 to-pink-500',
-                  icon: '🏢'
-                },
-                {
-                  title: 'Robotics Orchestration',
-                  description: 'Coordinate physical robots and autonomous systems with software agents for comprehensive automation solutions.',
-                  gradient: 'from-cyan-500 to-blue-500',
-                  icon: '🤖'
-                },
-                {
-                  title: 'AI Workflow Management',
-                  description: 'Build sophisticated AI pipelines that adapt and scale automatically based on workload and requirements.',
-                  gradient: 'from-green-500 to-teal-500',
-                  icon: '⚡'
-                },
-                {
-                  title: 'Control Systems',
-                  description: 'Manage complex control systems with intelligent decision-making and real-time adaptation capabilities.',
-                  gradient: 'from-orange-500 to-red-500',
-                  icon: '🎛️'
-                },
-                {
-                  title: 'Financial Analysis',
-                  description: 'Deploy specialized agents for market analysis, risk assessment, and automated trading strategies.',
-                  gradient: 'from-blue-500 to-indigo-500',
-                  icon: '📊'
-                },
-                {
-                  title: 'Custom Integrations',
-                  description: 'Build tailored solutions with our extensible platform and comprehensive developer toolkit.',
-                  gradient: 'from-teal-500 to-cyan-500',
-                  icon: '🔧'
-                }
-              ].map((useCase, index) => (
-                <div key={index} className="p-6 rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm hover:border-gray-700 transition-all duration-300 group cursor-pointer transform hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/10">
-                  <div className="text-2xl mb-4 group-hover:scale-110 transition-transform">
-                    {useCase.icon}
-                  </div>
-                  <h3 className="text-lg font-semibold mb-3 group-hover:text-cyan-300 transition-colors">
-                    {useCase.title}
-                  </h3>
-                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors leading-relaxed">
-                    {useCase.description}
-                  </p>
+            <div className="p-8 rounded-lg border border-gray-800 bg-gray-900/30 backdrop-blur-sm">
+              <h3 className="text-lg font-light text-cyan-300 mb-6">Security Architecture</h3>
+              <div className="space-y-3">
+                <div className="p-4 rounded border border-green-500/20 bg-green-500/5 flex items-center justify-between">
+                  <span className="text-sm font-light text-gray-300">Agent Authentication</span>
+                  <span className="text-xs font-light text-green-400">Active</span>
                 </div>
-              ))}
+                <div className="p-4 rounded border border-green-500/20 bg-green-500/5 flex items-center justify-between">
+                  <span className="text-sm font-light text-gray-300">End-to-End Encryption</span>
+                  <span className="text-xs font-light text-green-400">Active</span>
+                </div>
+                <div className="p-4 rounded border border-green-500/20 bg-green-500/5 flex items-center justify-between">
+                  <span className="text-sm font-light text-gray-300">Data Isolation</span>
+                  <span className="text-xs font-light text-green-400">Active</span>
+                </div>
+                <div className="p-4 rounded border border-green-500/20 bg-green-500/5 flex items-center justify-between">
+                  <span className="text-sm font-light text-gray-300">Audit Logging</span>
+                  <span className="text-xs font-light text-green-400">Active</span>
+                </div>
+              </div>
             </div>
           </div>
-        </section>
-      </ScaleGlowEffect>
-      {/* Why Cordon Section */}
-      <ScaleGlowEffect intensity={0.06}>
-        <section className="relative px-6 py-20 z-10">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Cordon</h2>
-              <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                Built for enterprises that need reliable, secure, and scalable AI orchestration.
+        </div>
+      </section>
+
+      {/* Developer Section */}
+      <section id="developers" className="relative px-8 py-20 z-10 border-t border-gray-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-16">
+            <h2 className="text-3xl font-extralight mb-4">Agent Development Kit</h2>
+            <p className="text-lg font-light text-gray-500 max-w-3xl">
+              Build, deploy, and monetize custom agents with our comprehensive SDK and marketplace.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12">
+            <div>
+              <div className="p-6 rounded-lg border border-gray-800 bg-gray-900/50 backdrop-blur-sm font-mono text-sm">
+                <div className="text-green-400 mb-2"># Install Cordon SDK</div>
+                <div className="text-gray-300 mb-4">pip install cordon-sdk</div>
+                
+                <div className="text-green-400 mb-2"># Create custom agent</div>
+                <div className="text-cyan-400">from</div> <div className="text-white inline">cordon </div>
+                <div className="text-cyan-400 inline">import</div> <div className="text-white inline"> Agent</div>
+                <div className="mt-2"></div>
+                <div className="text-cyan-400">class</div> <div className="text-yellow-400 inline"> FinancialAnalyst</div><div className="text-white inline">(Agent):</div>
+                <div className="text-white ml-4">async <div className="text-blue-400 inline">def</div> <div className="text-yellow-300 inline">execute</div>(self, request):</div>
+                <div className="text-gray-300 ml-8">data = await self.fetch_market_data()</div>
+                <div className="text-gray-300 ml-8">return self.analyze(data)</div>
+                <div className="mt-4"></div>
+                <div className="text-green-400"># Deploy to marketplace</div>
+                <div className="text-gray-300">cordon deploy --agent financial-analyst</div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-light text-white mb-3">Development Features</h3>
+                <ul className="space-y-2 text-sm font-light text-gray-400">
+                  <li className="flex items-center">
+                    <ChevronRight className="w-4 h-4 mr-2 text-cyan-500" strokeWidth={1.5} />
+                    Standardized agent interface with OpenAPI support
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronRight className="w-4 h-4 mr-2 text-blue-500" strokeWidth={1.5} />
+                    Local testing environment with sandbox simulation
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronRight className="w-4 h-4 mr-2 text-purple-500" strokeWidth={1.5} />
+                    Automatic agent discovery and intent matching
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronRight className="w-4 h-4 mr-2 text-green-500" strokeWidth={1.5} />
+                    Revenue sharing for marketplace contributions
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-6 rounded-lg border border-gray-800 bg-gray-900/30 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-light text-cyan-400">MARKETPLACE STATS</h4>
+                  <span className="text-xs font-light text-green-400">Live</span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-2xl font-light text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">1,247</div>
+                    <div className="text-xs font-light text-gray-500">Available Agents</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-light text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-500">$2.4M</div>
+                    <div className="text-xs font-light text-gray-500">Developer Revenue</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative px-8 py-20 z-10 border-t border-gray-900">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-3xl font-extralight mb-6">
+            Ready to build the future of AI orchestration?
+          </h2>
+          <p className="text-lg font-light text-gray-500 mb-10 max-w-2xl mx-auto">
+            Join leading enterprises using Cordon to coordinate multi-agent systems at scale.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button className="px-6 py-3 rounded text-sm font-light bg-white text-black hover:bg-gray-100 transition-all">
+              Request Enterprise Demo
+            </button>
+            <button className="px-6 py-3 rounded text-sm font-light border border-gray-800 text-gray-400 hover:text-white hover:border-gray-700 transition-all">
+              Read Technical Docs
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative px-8 py-16 border-t border-gray-900 z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-8 mb-12">
+            <div className="col-span-2">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="relative">
+                  <img src={cordonLogo} alt="Cordon" className="w-10 h-10 rounded-full border border-gray-700" />
+                </div>
+                <span className="text-sm font-light">Cordon</span>
+              </div>
+              <p className="text-sm font-light text-gray-600 max-w-md leading-relaxed">
+                Infrastructure for multi-agent AI systems. Secure orchestration, extensible architecture, enterprise-ready.
               </p>
             </div>
 
-           <div className="grid md:grid-cols-3 gap-8">
-             <div className="p-8 rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm hover:border-gray-700 transition-all duration-300 group">
-               <Shield className="w-12 h-12 text-cyan-400 mb-6 group-hover:scale-110 transition-transform" />
-               <h3 className="text-xl font-bold mb-4 group-hover:text-cyan-300 transition-colors">Security First</h3>
-               <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors leading-relaxed mb-6">
-                 All agents run in secure sandboxes with controlled access to resources, ensuring enterprise-grade security and compliance.
-               </p>
-               <div className="space-y-2">
-                 <div className="flex items-center text-xs text-cyan-400">
-                   <CheckCircle className="w-3 h-3 mr-2" />
-                   <span>End-to-end encryption</span>
-                 </div>
-                 <div className="flex items-center text-xs text-cyan-400">
-                   <CheckCircle className="w-3 h-3 mr-2" />
-                   <span>Isolated execution environments</span>
-                 </div>
-                 <div className="flex items-center text-xs text-cyan-400">
-                   <CheckCircle className="w-3 h-3 mr-2" />
-                   <span>SOC 2 Type II compliance</span>
-                 </div>
-               </div>
-             </div>
+            <div>
+              <h4 className="text-xs font-light text-gray-500 mb-4 uppercase tracking-wider">Product</h4>
+              <div className="space-y-2">
+                <a href="#" className="block text-sm font-light text-gray-600 hover:text-white transition-colors">Platform</a>
+                <a href="#" className="block text-sm font-light text-gray-600 hover:text-white transition-colors">SDK</a>
+                <a href="#" className="block text-sm font-light text-gray-600 hover:text-white transition-colors">Marketplace</a>
+                <a href="#" className="block text-sm font-light text-gray-600 hover:text-white transition-colors">Enterprise</a>
+              </div>
+            </div>
 
-             <div className="p-8 rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm hover:border-gray-700 transition-all duration-300 group">
-               <Zap className="w-12 h-12 text-cyan-400 mb-6 group-hover:scale-110 transition-transform" />
-               <h3 className="text-xl font-bold mb-4 group-hover:text-cyan-300 transition-colors">Extensible Platform</h3>
-               <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors leading-relaxed mb-6">
-                 Upload custom agents and tools to create specialized workflows tailored to your specific business needs.
-               </p>
-               <div className="space-y-2">
-                 <div className="flex items-center text-xs text-cyan-400">
-                   <CheckCircle className="w-3 h-3 mr-2" />
-                   <span>Custom agent marketplace</span>
-                 </div>
-                 <div className="flex items-center text-xs text-cyan-400">
-                   <CheckCircle className="w-3 h-3 mr-2" />
-                   <span>Plugin architecture</span>
-                 </div>
-                 <div className="flex items-center text-xs text-cyan-400">
-                   <CheckCircle className="w-3 h-3 mr-2" />
-                   <span>API-first integrations</span>
-                 </div>
-               </div>
-             </div>
+            <div>
+              <h4 className="text-xs font-light text-gray-500 mb-4 uppercase tracking-wider">Resources</h4>
+              <div className="space-y-2">
+                <a href="#" className="block text-sm font-light text-gray-600 hover:text-white transition-colors">Documentation</a>
+                <a href="#" className="block text-sm font-light text-gray-600 hover:text-white transition-colors">API Reference</a>
+                <a href="#" className="block text-sm font-light text-gray-600 hover:text-white transition-colors">Security</a>
+                <a href="#" className="block text-sm font-light text-gray-600 hover:text-white transition-colors">Status</a>
+              </div>
+            </div>
+          </div>
 
-             <div className="p-8 rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm hover:border-gray-700 transition-all duration-300 group">
-               <Code className="w-12 h-12 text-cyan-400 mb-6 group-hover:scale-110 transition-transform" />
-               <h3 className="text-xl font-bold mb-4 group-hover:text-cyan-300 transition-colors">Context-Aware</h3>
-               <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors leading-relaxed mb-6">
-                 Advanced memory and context systems enable agents to learn and adapt, providing personalized automation over time.
-               </p>
-               <div className="space-y-2">
-                 <div className="flex items-center text-xs text-cyan-400">
-                   <CheckCircle className="w-3 h-3 mr-2" />
-                   <span>Persistent memory</span>
-                 </div>
-                 <div className="flex items-center text-xs text-cyan-400">
-                   <CheckCircle className="w-3 h-3 mr-2" />
-                   <span>Contextual learning</span>
-                 </div>
-                 <div className="flex items-center text-xs text-cyan-400">
-                   <CheckCircle className="w-3 h-3 mr-2" />
-                   <span>Adaptive workflows</span>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
-       </section>
-     </ScaleGlowEffect>
-
-     {/* Developer SDK Section */}
-     <ScaleGlowEffect intensity={0.06}>
-       <section id="developers" className="relative px-6 py-20 z-10">
-         <div className="max-w-6xl mx-auto">
-           <div className="text-center mb-16">
-             <h2 className="text-3xl md:text-4xl font-bold mb-4">Developer SDK & Agent Store</h2>
-             <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-               Build, share, and monetize intelligent agents with our comprehensive development platform.
-             </p>
-           </div>
-
-           <div className="grid lg:grid-cols-2 gap-12 items-center">
-             <div>
-               <h3 className="text-2xl font-bold mb-6">Upload Custom Agents</h3>
-               <p className="text-gray-400 mb-8 leading-relaxed">
-                 Create specialized agents for your domain and share them with the Cordon community. Our platform handles sandboxing, discovery, and execution.
-               </p>
-               
-               <CodeBlock>
-{`// Upload a custom agent
-import { CordonAgent } from '@cordon/sdk';
-
-class MarketAnalyst extends CordonAgent {
- async execute(request) {
-   const data = await this.tools.fetchMarketData();
-   const analysis = await this.analyze(data, request.parameters);
-   
-   return {
-     insights: analysis.insights,
-     recommendations: analysis.recommendations,
-     confidence: analysis.confidence
-   };
- }
-}
-
-// Register and deploy
-await cordon.agents.upload(MarketAnalyst, {
- name: "Market Analyst Pro",
- description: "Advanced market analysis agent",
- category: "finance"
-});`}
-               </CodeBlock>
-
-               <div className="mt-8 flex gap-4">
-                 <button className="px-6 py-3 rounded-lg bg-white text-black font-medium hover:bg-gray-100 transition-all">
-                   Get SDK Access
-                 </button>
-                 <button className="px-6 py-3 rounded-lg border border-gray-700 text-gray-300 font-medium hover:border-gray-600 hover:text-white transition-all">
-                   View Documentation
-                 </button>
-               </div>
-             </div>
-
-             <div className="space-y-6">
-               <div className="p-6 rounded-xl bg-gray-900/50 border border-gray-800 hover:border-gray-700 transition-all">
-                 <div className="flex items-center mb-3">
-                   <Shield className="w-6 h-6 text-cyan-400 mr-3" />
-                   <h4 className="font-semibold text-cyan-300">Sandboxed Execution</h4>
-                 </div>
-                 <p className="text-sm text-gray-400">All agents run in secure, isolated environments with controlled resource access and monitoring.</p>
-               </div>
-
-               <div className="p-6 rounded-xl bg-gray-900/50 border border-gray-800 hover:border-gray-700 transition-all">
-                 <div className="flex items-center mb-3">
-                   <Star className="w-6 h-6 text-cyan-400 mr-3" />
-                   <h4 className="font-semibold text-cyan-300">Auto Discovery</h4>
-                 </div>
-                 <p className="text-sm text-gray-400">Vector-based agent matching ensures the right agent is selected for each task automatically.</p>
-               </div>
-
-               <div className="p-6 rounded-xl bg-gray-900/50 border border-gray-800 hover:border-gray-700 transition-all">
-                 <div className="flex items-center mb-3">
-                   <Users className="w-6 h-6 text-cyan-400 mr-3" />
-                   <h4 className="font-semibold text-cyan-300">Revenue Sharing</h4>
-                 </div>
-                 <p className="text-sm text-gray-400">Monetize your agents through our marketplace with transparent revenue sharing and analytics.</p>
-               </div>
-             </div>
-           </div>
-         </div>
-       </section>
-     </ScaleGlowEffect>
-
-     {/* Stats Section */}
-     <ScaleGlowEffect intensity={0.05}>
-       <section className="relative px-6 py-20 z-10">
-         <div className="max-w-6xl mx-auto">
-           <div className="bg-gray-900/30 border border-gray-800 rounded-xl p-12 backdrop-blur-sm">
-             <div className="grid md:grid-cols-4 gap-8 text-center">
-               <div>
-                 <div className="text-3xl font-bold text-cyan-400 mb-2">10M+</div>
-                 <div className="text-sm text-gray-400">Agent Executions</div>
-               </div>
-               <div>
-                 <div className="text-3xl font-bold text-cyan-400 mb-2">500+</div>
-                 <div className="text-sm text-gray-400">Custom Agents</div>
-               </div>
-               <div>
-                 <div className="text-3xl font-bold text-cyan-400 mb-2">99.9%</div>
-                 <div className="text-sm text-gray-400">Uptime SLA</div>
-               </div>
-               <div>
-                 <div className="text-3xl font-bold text-cyan-400 mb-2">24/7</div>
-                 <div className="text-sm text-gray-400">Support</div>
-               </div>
-             </div>
-           </div>
-         </div>
-       </section>
-     </ScaleGlowEffect>
-
-     {/* Trusted By Section */}
-     <section className="relative px-6 py-20 z-10">
-       <div className="max-w-6xl mx-auto text-center">
-         <h2 className="text-lg font-semibold mb-12 text-gray-400">Trusted by AI-first companies</h2>
-         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center opacity-50">
-           {[1, 2, 3, 4, 5].map((i) => (
-             <div key={i} className="h-12 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-all cursor-pointer">
-               <div className="text-gray-500 font-bold text-sm">LOGO {i}</div>
-             </div>
-           ))}
-         </div>
-       </div>
-     </section>
-
-     {/* Testimonials */}
-     <ScaleGlowEffect intensity={0.06}>
-       <section className="relative px-6 py-20 z-10">
-         <div className="max-w-6xl mx-auto">
-           <div className="text-center mb-16">
-             <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Users Say</h2>
-           </div>
-           
-           <div className="grid md:grid-cols-3 gap-6">
-             {[
-               {
-                 quote: "Cordon transformed our AI workflow from chaos to orchestrated precision. We've seen 300% improvement in task completion rates.",
-                 author: "Sarah Chen",
-                 role: "CTO at TechFlow AI",
-                 avatar: "👩‍💼"
-               },
-               {
-                 quote: "The agent marketplace is revolutionary. We've built custom financial analysis agents that generate $2M+ in insights monthly.",
-                 author: "Marcus Rodriguez",
-                 role: "Head of AI at FinanceCore",
-                 avatar: "👨‍💻"
-               },
-               {
-                 quote: "Security was our biggest concern with AI automation. Cordon's sandboxing gives us enterprise-grade confidence.",
-                 author: "Dr. Emily Watson",
-                 role: "CISO at SecureBank",
-                 avatar: "👩‍🔬"
-               }
-             ].map((testimonial, index) => (
-               <div key={index} className="p-6 rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm hover:border-gray-700 transition-all">
-                 <div className="text-3xl mb-4">"</div>
-                 <p className="text-sm text-gray-300 mb-6 leading-relaxed italic">
-                   {testimonial.quote}
-                 </p>
-                 <div className="flex items-center">
-                   <div className="text-2xl mr-3">{testimonial.avatar}</div>
-                   <div>
-                     <div className="font-semibold text-white text-sm">{testimonial.author}</div>
-                     <div className="text-xs text-gray-400">{testimonial.role}</div>
-                   </div>
-                 </div>
-               </div>
-             ))}
-           </div>
-         </div>
-       </section>
-     </ScaleGlowEffect>
-
-     {/* CTA Section */}
-     <ScaleGlowEffect intensity={0.08}>
-       <section className="relative px-6 py-20 z-10">
-         <div className="max-w-4xl mx-auto text-center">
-           <div className="p-12 rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm">
-             <h2 className="text-3xl md:text-4xl font-bold mb-6">
-               Ready to orchestrate the future?
-             </h2>
-             <p className="text-lg text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-               Join the next generation of AI automation. Request early access to Cordon and transform your workflows today.
-             </p>
-             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-               <button className="px-8 py-4 rounded-lg bg-white text-black font-medium hover:bg-gray-100 transition-all">
-                 Request Early Access
-                 <ArrowRight className="w-4 h-4 ml-2 inline" />
-               </button>
-               <button className="px-8 py-4 rounded-lg border border-gray-700 text-gray-300 font-medium hover:border-gray-600 hover:text-white transition-all">
-                 Schedule Demo
-               </button>
-             </div>
-             
-             <div className="mt-8 text-sm text-gray-500">
-               <p>🚀 Join 1000+ companies already on the waitlist</p>
-             </div>
-           </div>
-         </div>
-       </section>
-     </ScaleGlowEffect>
-
-     {/* Footer */}
-     <footer className="relative px-6 py-16 border-t border-gray-800 z-10">
-       <div className="max-w-6xl mx-auto">
-         <div className="grid md:grid-cols-4 gap-8 mb-12">
-           <div className="col-span-2">
-             <div className="flex items-center space-x-3 mb-6">
-               <img src={cordonLogo} alt="Cordon Logo" className="w-6 h-6 rounded-full" />
-               <span className="text-lg font-semibold">Cordon</span>
-             </div>
-             <p className="text-sm text-gray-400 mb-6 max-w-md leading-relaxed">
-               Cordon is a modular AI orchestration platform for next-gen agent systems. Build, deploy, and scale intelligent automation across any domain.
-             </p>
-             <div className="flex space-x-4">
-               <a href="#" className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors">
-                 <Twitter className="w-4 h-4" />
-               </a>
-               <a href="#" className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors">
-                 <Github className="w-4 h-4" />
-               </a>
-               <a href="#" className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors">
-                 <Linkedin className="w-4 h-4" />
-               </a>
-             </div>
-           </div>
-
-           <div>
-             <h4 className="font-semibold mb-4 text-sm">Product</h4>
-             <div className="space-y-2">
-               <a href="#" className="block text-sm text-gray-400 hover:text-white transition-colors">Platform</a>
-               <a href="#" className="block text-sm text-gray-400 hover:text-white transition-colors">SDK</a>
-               <a href="#" className="block text-sm text-gray-400 hover:text-white transition-colors">Agent Store</a>
-               <a href="#" className="block text-sm text-gray-400 hover:text-white transition-colors">Pricing</a>
-               <a href="#" className="block text-sm text-gray-400 hover:text-white transition-colors">Enterprise</a>
-             </div>
-           </div>
-
-           <div>
-             <h4 className="font-semibold mb-4 text-sm">Company</h4>
-             <div className="space-y-2">
-               <a href="#" className="block text-sm text-gray-400 hover:text-white transition-colors">About</a>
-               <a href="#" className="block text-sm text-gray-400 hover:text-white transition-colors">Blog</a>
-               <a href="#" className="block text-sm text-gray-400 hover:text-white transition-colors">Careers</a>
-               <a href="#" className="block text-sm text-gray-400 hover:text-white transition-colors">Contact</a>
-               <a href="#" className="block text-sm text-gray-400 hover:text-white transition-colors">Press</a>
-             </div>
-           </div>
-         </div>
-
-         <div className="pt-8 border-t border-gray-800">
-           <div className="flex flex-col md:flex-row justify-between items-center">
-             <div className="text-sm text-gray-400 mb-4 md:mb-0">
-               © 2025 Cordon AI Systems. All rights reserved.
-             </div>
-             <div className="flex space-x-6">
-               <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
-               <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors">Terms of Service</a>
-               <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors">Security</a>
-             </div>
-           </div>
-         </div>
-       </div>
-     </footer>
-   </div>
- );
+          <div className="pt-8 border-t border-gray-900">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <div className="text-xs font-light text-gray-600 mb-4 md:mb-0">
+                © 2025 Cordon AI All rights reserved.
+              </div>
+              <div className="flex space-x-6">
+                <a href="#" className="text-xs font-light text-gray-600 hover:text-white transition-colors">Privacy</a>
+                <a href="#" className="text-xs font-light text-gray-600 hover:text-white transition-colors">Terms</a>
+                <a href="#" className="text-xs font-light text-gray-600 hover:text-white transition-colors">Security</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
 };
 
 export default App;
