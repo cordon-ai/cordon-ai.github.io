@@ -238,19 +238,19 @@ const App = () => {
               title="Adaptive Learning"
               description="Continuously improves performance by learning from client data, preferences, and workflows. Maintains persistent context across interactions."
               icon={Cpu}
-              metrics={{ value: "10M+", label: "Agent Executions" }}
+              // metrics={{ value: "10M+", label: "Agent Executions" }}
             />
             <FeatureCard
               title="Cross-Domain Integration"
               description="Extends from enterprise software to IoT devices and robotics. Unified control plane for digital and physical agent coordination."
               icon={Network}
-              metrics={{ value: "500+", label: "Integrated Systems" }}
+              // metrics={{ value: "500+", label: "Integrated Systems" }}
             />
             <FeatureCard
               title="Developer Ecosystem"
               description="Open SDK for third-party agent development. Revenue sharing model for contributed agents with automated discovery."
               icon={Code}
-              metrics={{ value: "1000+", label: "Custom Agents" }}
+              // metrics={{ value: "1000+", label: "Custom Agents" }}
             />
           </div>
         </div>
@@ -369,7 +369,7 @@ const App = () => {
                 </ul>
               </div>
 
-              <div className="p-6 rounded-lg border border-gray-800 bg-gray-900/30 backdrop-blur-sm">
+              {/* <div className="p-6 rounded-lg border border-gray-800 bg-gray-900/30 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-sm font-light text-cyan-400">MARKETPLACE STATS</h4>
                   <span className="text-xs font-light text-green-400">Live</span>
@@ -384,7 +384,7 @@ const App = () => {
                     <div className="text-xs font-light text-gray-500">Developer Revenue</div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
