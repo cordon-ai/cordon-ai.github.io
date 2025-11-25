@@ -219,7 +219,8 @@ const Orb: React.FC<OrbProps> = ({
 
     function resize() {
       if (!container) return;
-      const dpr = window.devicePixelRatio || 1;
+      // Cap devicePixelRatio to keep GPU workload manageable on high-DPI screens.
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const width = container.clientWidth;
       const height = container.clientHeight;
       renderer.setSize(width * dpr, height * dpr);

@@ -112,6 +112,8 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
         // Ensure proper z-index stacking
         card.style.zIndex = `${index + 10}`;
       });
+
+      rafRef.current = null;
     };
 
     // Run once on mount to set initial positions
@@ -119,6 +121,7 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
 
     // Loop
     const onScroll = () => {
+      if (rafRef.current !== null) return;
       rafRef.current = requestAnimationFrame(handleScroll);
     };
 

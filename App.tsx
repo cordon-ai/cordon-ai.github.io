@@ -1,20 +1,23 @@
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { HashRouter } from 'react-router-dom';
 import Header from './components/Header';
-import OrbBackground from './components/OrbBackground';
-import Orb from './components/Orb';
 import InteractiveDemo from './components/InteractiveDemo';
 import ArchitectureStack from './components/ArchitectureStack';
 import Features from './components/Features';
 import Footer from './components/Footer';
 import { ChevronRight } from 'lucide-react';
 
+const OrbBackground = React.lazy(() => import('./components/OrbBackground'));
+const Orb = React.lazy(() => import('./components/Orb'));
+
 const App: React.FC = () => {
   return (
     <HashRouter>
       <div className="min-h-screen bg-slate-950 text-white selection:bg-cordon-500/30 selection:text-cordon-200 relative">
-        <OrbBackground />
+        <Suspense fallback={null}>
+          <OrbBackground />
+        </Suspense>
         
         <Header />
 
@@ -23,9 +26,11 @@ const App: React.FC = () => {
           <section className="relative h-[800px] flex flex-col items-center justify-center text-center z-10 overflow-hidden">
             
             {/* Main Orb Behind Text */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[900px] md:h-[900px] z-0 pointer-events-auto">
-              <Orb hue={0} hoverIntensity={0.3} />
-            </div>
+            <Suspense fallback={null}>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[900px] md:h-[900px] z-0 pointer-events-auto">
+                <Orb hue={0} hoverIntensity={0.3} />
+              </div>
+            </Suspense>
 
             {/* Content Content - Pointer events none on container to let clicks pass to Orb where possible, auto on interactables */}
             <div className="relative z-10 flex flex-col items-center max-w-5xl mx-auto px-6 pointer-events-none">
